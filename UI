@@ -106,3 +106,216 @@ TweenService:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.Easing
 UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
 end)
+
+function dragify(Frame, object)
+    dragToggle = nil
+    dragSpeed = .25
+    dragInput = nil
+    dragStart = nil
+    dragPos = nil
+    function updateInput(input)
+        Delta = input.Position - dragStart
+        Position =
+            UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
+        game:GetService("TweenService"):Create(object, TweenInfo.new(dragSpeed), {Position = Position}):Play()
+    end
+    Frame.InputBegan:Connect(
+        function(input)
+            if
+                (input.UserInputType == Enum.UserInputType.MouseButton1 or
+                    input.UserInputType == Enum.UserInputType.Touch)
+            then
+                dragToggle = true
+                dragStart = input.Position
+                startPos = object.Position
+                input.Changed:Connect(
+                    function()
+                        if (input.UserInputState == Enum.UserInputState.End) then
+                            dragToggle = false
+                        end
+                    end
+                )
+            end
+        end
+    )
+    Frame.InputChanged:Connect(
+        function(input)
+            if
+                (input.UserInputType == Enum.UserInputType.MouseMovement or
+                    input.UserInputType == Enum.UserInputType.Touch)
+            then
+                dragInput = input
+            end
+        end
+    )
+    game:GetService("UserInputService").InputChanged:Connect(
+    function(input)
+        if (input == dragInput and dragToggle) then
+            updateInput(input)
+        end
+    end
+    )
+end
+
+dragify(Frame, Frame)
+
+-- Utility functions
+local add = {
+    header = function(text)
+        local Header = Instance.new("TextLabel")
+        local Line = Instance.new("Frame")
+        local Line_2 = Instance.new("Frame")
+    
+        Header.Parent = ScrollingFrame
+        Header.AnchorPoint = Vector2.new(0.5, 0.5)
+        Header.BackgroundTransparency = 1
+        Header.Size = UDim2.new(0, 460, 0, 29)
+        Header.Font = Enum.Font.FredokaOne
+        Header.Text = tostring(text)
+        Header.TextColor3 = Color3.fromRGB(71, 170, 170)
+        Header.TextSize = 18
+
+        -- คำนวณตำแหน่งตามขนาด UIListLayout
+        Header.Position = UDim2.new(0.5, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+
+        local textSize = game:GetService("TextService"):GetTextSize(text, 18, Enum.Font.FredokaOne, Vector2.new(math.huge, 29))
+        local minLineWidth = 100
+        local minSpacing = 15
+        local dynamicLineWidth = math.max(minLineWidth, (460 - textSize.X) / 2 - minSpacing)
+
+        Line.Parent = Header
+        Line.AnchorPoint = Vector2.new(1, 0.5)
+        Line.BackgroundColor3 = Color3.fromRGB(71, 170, 170)
+        Line.Position = UDim2.new(0.5, -textSize.X / 2 - minSpacing, 0.5, 0)
+        Line.Size = UDim2.new(0, dynamicLineWidth, 0, 3)
+
+        Line_2.Parent = Header
+        Line_2.AnchorPoint = Vector2.new(0, 0.5)
+        Line_2.BackgroundColor3 = Color3.fromRGB(71, 170, 170)
+        Line_2.Position = UDim2.new(0.5, textSize.X / 2 + minSpacing, 0.5, 0)
+        Line_2.Size = UDim2.new(0, dynamicLineWidth, 0, 3)
+    end,    
+
+    text = function(text)
+        local Text = Instance.new("TextLabel")
+
+        Text.Parent = ScrollingFrame
+        Text.AnchorPoint = Vector2.new(0.5, 0.5)
+        Text.BackgroundTransparency = 1
+        Text.Position = UDim2.new(0.5, 0, 0.24, 0)
+        Text.Size = UDim2.new(0, 460, 0, 27)
+        Text.Font = Enum.Font.FredokaOne
+        Text.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Text.TextSize = 15
+        Text.Text = tostring(text)
+
+        return {
+            new = function(newtext)
+                Text.Text = tostring(newtext)
+            end
+        }
+    end,
+
+    Button = function(text, callback)
+        local Button = Instance.new("TextButton")
+        local UICorner_2 = Instance.new("UICorner")
+
+        Button.Parent = ScrollingFrame
+        Button.AnchorPoint = Vector2.new(0.5, 0.5)
+        Button.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        Button.Position = UDim2.new(0.52, 0, 0.12, 0)
+        Button.Size = UDim2.new(0, 444, 0, 31)
+        Button.Font = Enum.Font.FredokaOne
+        Button.Text = text
+        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Button.TextSize = 14
+
+        UICorner_2.CornerRadius = UDim.new(0, 3)
+        UICorner_2.Parent = Button
+
+        Button.MouseButton1Click:Connect(callback)
+    end,
+
+    Toggle = function(text, default, callback)
+        local ToggleFrame = Instance.new("Frame")
+        local ToggleLabel = Instance.new("TextLabel")
+        local Toggle = Instance.new("ImageLabel")
+        local ToggleButton = Instance.new("TextButton")
+        local Circle = Instance.new("ImageLabel")
+
+        -- Toggle Frame
+        ToggleFrame.Parent = ScrollingFrame
+        ToggleFrame.Size = UDim2.new(0, 460, 0, 30)
+        ToggleFrame.BackgroundTransparency = 1
+
+        -- Toggle Label
+        ToggleLabel.Parent = ToggleFrame
+        ToggleLabel.Size = UDim2.new(0, 400, 0, 30)
+        ToggleLabel.BackgroundTransparency = 1
+        ToggleLabel.Font = Enum.Font.FredokaOne
+        ToggleLabel.Text = text
+        ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        ToggleLabel.TextSize = 15
+        ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        -- Toggle Switch
+        Toggle.Parent = ToggleFrame
+        Toggle.Size = UDim2.new(0, 46, 0, 22)
+        Toggle.Position = UDim2.new(1, -50, 0.5, -11)
+        Toggle.BackgroundColor3 = default and Color3.fromRGB(64, 200, 114) or Color3.fromRGB(200, 200, 200)
+        Toggle.BackgroundTransparency = 0
+        Toggle.BorderSizePixel = 0
+
+        -- Toggle Button (คลิกเพื่อเปลี่ยนสถานะ)
+        ToggleButton.Parent = Toggle
+        ToggleButton.Size = UDim2.new(1, 0, 1, 0)
+        ToggleButton.BackgroundTransparency = 1
+        ToggleButton.Text = ""
+
+        -- Circle Indicator
+        Circle.Parent = Toggle
+        Circle.Size = UDim2.new(0, 18, 0, 18)
+        Circle.Position = default and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
+        Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Circle.BackgroundTransparency = 0
+        Circle.BorderSizePixel = 0
+
+        -- Toggle Logic
+        local toggled = default
+        ToggleButton.MouseButton1Click:Connect(function()
+            toggled = not toggled
+            local toggleColor = toggled and Color3.fromRGB(64, 200, 114) or Color3.fromRGB(200, 200, 200)
+            local circlePos = toggled and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
+
+            game:GetService("TweenService"):Create(Toggle, TweenInfo.new(0.3), {BackgroundColor3 = toggleColor}):Play()
+            game:GetService("TweenService"):Create(Circle, TweenInfo.new(0.3), {Position = circlePos}):Play()
+
+            if callback then callback(toggled) end
+        end)
+    end
+}
+
+add.header("XFD")
+
+add.text("This is a test")
+
+local textxx = add.text("This is a test2")
+
+add.Button("Test", function()
+    print("Test")
+    textxx.new("This is a new text")
+end)
+
+add.header("XFD")
+
+add.Button("Test", function()
+    print("Test")
+end)
+
+add.header("Toggle Header")
+
+-- ตัวอย่างการใช้งาน
+add.Toggle("Enable Feature", false, function(state)
+    print("Toggle is now", state)
+end)
+
