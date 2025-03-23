@@ -165,7 +165,20 @@ local add = {
         local Header = Instance.new("TextLabel")
         local Line = Instance.new("Frame")
         local Line_2 = Instance.new("Frame")
-    
+
+        -- Ensure ScrollingFrame exists
+        if not ScrollingFrame then
+            warn("ScrollingFrame is not defined!")
+            return
+        end
+        
+        -- Ensure UIListLayout exists inside ScrollingFrame
+        local UIListLayout = ScrollingFrame:FindFirstChildOfClass("UIListLayout")
+        if not UIListLayout then
+            warn("UIListLayout is not found inside ScrollingFrame!")
+            return
+        end
+
         Header.Parent = ScrollingFrame
         Header.AnchorPoint = Vector2.new(0.5, 0.5)
         Header.BackgroundTransparency = 1
@@ -175,7 +188,7 @@ local add = {
         Header.TextColor3 = Color3.fromRGB(71, 170, 170)
         Header.TextSize = 18
 
-        -- คำนวณตำแหน่งตามขนาด UIListLayout
+        -- Correct position calculation
         Header.Position = UDim2.new(0.5, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 
         local textSize = game:GetService("TextService"):GetTextSize(text, 18, Enum.Font.FredokaOne, Vector2.new(math.huge, 29))
@@ -194,10 +207,15 @@ local add = {
         Line_2.BackgroundColor3 = Color3.fromRGB(71, 170, 170)
         Line_2.Position = UDim2.new(0.5, textSize.X / 2 + minSpacing, 0.5, 0)
         Line_2.Size = UDim2.new(0, dynamicLineWidth, 0, 3)
-    end,    
+    end,
 
     text = function(text)
         local Text = Instance.new("TextLabel")
+
+        if not ScrollingFrame then
+            warn("ScrollingFrame is not defined!")
+            return
+        end
 
         Text.Parent = ScrollingFrame
         Text.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -220,6 +238,11 @@ local add = {
         local Button = Instance.new("TextButton")
         local UICorner_2 = Instance.new("UICorner")
 
+        if not ScrollingFrame then
+            warn("ScrollingFrame is not defined!")
+            return
+        end
+
         Button.Parent = ScrollingFrame
         Button.AnchorPoint = Vector2.new(0.5, 0.5)
         Button.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
@@ -237,85 +260,146 @@ local add = {
     end,
 
     Toggle = function(text, default, callback)
-        local ToggleFrame = Instance.new("Frame")
-        local ToggleLabel = Instance.new("TextLabel")
-        local Toggle = Instance.new("ImageLabel")
-        local ToggleButton = Instance.new("TextButton")
-        local Circle = Instance.new("ImageLabel")
+    local ToggleFrame = Instance.new("Frame")
+    local ToggleTextLabel = Instance.new("TextLabel")
+    local Toggle = Instance.new("ImageLabel")
+    local Button = Instance.new("TextButton")
+    local Circle = Instance.new("ImageLabel")
 
-        -- Toggle Frame
-        ToggleFrame.Parent = ScrollingFrame
-        ToggleFrame.Size = UDim2.new(0, 460, 0, 30)
-        ToggleFrame.BackgroundTransparency = 1
+    -- Ensure ScrollingFrame exists
+    if not ScrollingFrame then
+        warn("ScrollingFrame is not defined!")
+        return
+    end
 
-        -- Toggle Label
-        ToggleLabel.Parent = ToggleFrame
-        ToggleLabel.Size = UDim2.new(0, 400, 0, 30)
-        ToggleLabel.BackgroundTransparency = 1
-        ToggleLabel.Font = Enum.Font.FredokaOne
-        ToggleLabel.Text = text
-        ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ToggleLabel.TextSize = 15
-        ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    -- Create Parent Frame (Wrap Text & Toggle together)
+    ToggleFrame.Parent = ScrollingFrame
+    ToggleFrame.BackgroundTransparency = 1
+    ToggleFrame.Size = UDim2.new(0, 200, 0, 22) -- ปรับขนาดให้เหมาะสม
+    ToggleFrame.Position = UDim2.new(0.5, -100, 0, 0) -- จัดตำแหน่งกึ่งกลาง
 
-        -- Toggle Switch
-        Toggle.Parent = ToggleFrame
-        Toggle.Size = UDim2.new(0, 46, 0, 22)
-        Toggle.Position = UDim2.new(1, -50, 0.5, -11)
-        Toggle.BackgroundColor3 = default and Color3.fromRGB(64, 200, 114) or Color3.fromRGB(200, 200, 200)
-        Toggle.BackgroundTransparency = 0
-        Toggle.BorderSizePixel = 0
+    -- Create Label for Toggle Text (Left Side)
+    ToggleTextLabel.Parent = ToggleFrame
+    ToggleTextLabel.AnchorPoint = Vector2.new(0, 0.5)
+    ToggleTextLabel.BackgroundTransparency = 1.000
+    ToggleTextLabel.Size = UDim2.new(0, 50, 1, 0) -- กำหนดขนาดให้พอดี
+    ToggleTextLabel.Position = UDim2.new(0, 0, 0.5, 0) -- ชิดซ้าย
+    ToggleTextLabel.Font = Enum.Font.FredokaOne
+    ToggleTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleTextLabel.TextSize = 13
+    ToggleTextLabel.Text = text
 
-        -- Toggle Button (คลิกเพื่อเปลี่ยนสถานะ)
-        ToggleButton.Parent = Toggle
-        ToggleButton.Size = UDim2.new(1, 0, 1, 0)
-        ToggleButton.BackgroundTransparency = 1
-        ToggleButton.Text = ""
+    -- Create Toggle Background (Right Side)
+    Toggle.Parent = ToggleFrame
+    Toggle.AnchorPoint = Vector2.new(1, 0.5) -- ให้ชิดขวาของ ToggleFrame
+    Toggle.BackgroundTransparency = 1.000
+    Toggle.Position = UDim2.new(1, 0, 0.5, 0) -- อยู่ทางขวา
+    Toggle.Size = UDim2.new(0, 46, 0, 22)
+    Toggle.Image = "rbxassetid://3570695787"
+    Toggle.ImageColor3 = Color3.fromRGB(200, 200, 200)
+    Toggle.ScaleType = Enum.ScaleType.Slice
+    Toggle.SliceCenter = Rect.new(100, 100, 100, 100)
+    Toggle.SliceScale = 0.120
 
-        -- Circle Indicator
-        Circle.Parent = Toggle
-        Circle.Size = UDim2.new(0, 18, 0, 18)
-        Circle.Position = default and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
-        Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Circle.BackgroundTransparency = 0
-        Circle.BorderSizePixel = 0
+    -- Create Button
+    Button.Parent = Toggle
+    Button.BackgroundTransparency = 1.000
+    Button.Size = UDim2.new(1, 0, 1, 0)
+    Button.TextTransparency = 1.000
 
-        -- Toggle Logic
-        local toggled = default
-        ToggleButton.MouseButton1Click:Connect(function()
-            toggled = not toggled
-            local toggleColor = toggled and Color3.fromRGB(64, 200, 114) or Color3.fromRGB(200, 200, 200)
-            local circlePos = toggled and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
+    -- Create Circle (Toggle Indicator)
+    Circle.Parent = Toggle
+    Circle.BackgroundTransparency = 1.000
+    Circle.Position = UDim2.new(0, 2, 0, 2)
+    Circle.Size = UDim2.new(0, 18, 0, 18)
+    Circle.Image = "rbxassetid://3570695787"
+    Circle.ScaleType = Enum.ScaleType.Slice
+    Circle.SliceCenter = Rect.new(100, 100, 100, 100)
+    Circle.SliceScale = 0.120
 
-            game:GetService("TweenService"):Create(Toggle, TweenInfo.new(0.3), {BackgroundColor3 = toggleColor}):Play()
-            game:GetService("TweenService"):Create(Circle, TweenInfo.new(0.3), {Position = circlePos}):Play()
+    -- Toggle Logic
+    local toggled = default
+    Button.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        local toggleColor = toggled and Color3.fromRGB(64, 200, 114) or Color3.fromRGB(200, 200, 200)
+        local circlePos = toggled and UDim2.new(1, -20, 0, 2) or UDim2.new(0, 2, 0, 2)
 
-            if callback then callback(toggled) end
+        game:GetService("TweenService"):Create(Toggle, TweenInfo.new(0.3), {ImageColor3 = toggleColor}):Play()
+        game:GetService("TweenService"):Create(Circle, TweenInfo.new(0.3), {Position = circlePos}):Play()
+
+        if callback then callback(toggled) end
+    end)
+end  ,
+Dropdown = function(text, options, callback)
+    local DropdownFrame = Instance.new("Frame")
+    local DropdownButton = Instance.new("TextButton")
+    local DropdownList = Instance.new("ScrollingFrame")
+    local UIListLayout = Instance.new("UIListLayout")
+    local isOpen = false
+
+    DropdownFrame.Parent = ScrollingFrame
+    DropdownFrame.BackgroundTransparency = 1
+    DropdownFrame.Size = UDim2.new(0, 444, 0, 31)
+
+    DropdownButton.Parent = DropdownFrame
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    DropdownButton.Size = UDim2.new(1, 0, 1, 0)
+    DropdownButton.Font = Enum.Font.FredokaOne
+    DropdownButton.Text = text
+    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownButton.TextSize = 14
+    DropdownButton.AutoButtonColor = true
+
+    DropdownList.Parent = DropdownFrame
+    DropdownList.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    DropdownList.Size = UDim2.new(1, 0, 0, 0) -- เริ่มต้นปิด
+    DropdownList.Position = UDim2.new(0, 0, 1, 0)
+    DropdownList.Visible = false
+    DropdownList.ScrollBarThickness = 5 -- ✅ แสดงแถบเลื่อน
+    DropdownList.ClipsDescendants = true
+    DropdownList.AutomaticCanvasSize = Enum.AutomaticSize.Y -- ✅ ให้ขยายตามเนื้อหา (ใหม่)
+
+    UIListLayout.Parent = DropdownList
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 5)
+
+    -- ✅ อัปเดตขนาด CanvasSize ให้สามารถเลื่อนได้
+    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        DropdownList.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    local function toggleDropdown()
+        isOpen = not isOpen
+        DropdownList.Visible = true
+        local newSize = isOpen and UDim2.new(1, 0, 0, math.clamp(UIListLayout.AbsoluteContentSize.Y, 30, 200)) or UDim2.new(1, 0, 0, 0)
+
+        TweenService:Create(DropdownList, TweenInfo.new(0.3), {Size = newSize}):Play()
+        if not isOpen then
+            task.wait(0.3)
+            DropdownList.Visible = false
+        end
+    end
+
+    DropdownButton.MouseButton1Click:Connect(toggleDropdown)
+
+    for _, option in ipairs(options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Parent = DropdownList
+        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        OptionButton.Size = UDim2.new(1, 0, 0, 30)
+        OptionButton.Font = Enum.Font.FredokaOne
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.TextSize = 14
+        OptionButton.AutoButtonColor = true
+
+        OptionButton.MouseButton1Click:Connect(function()
+            DropdownButton.Text = option
+            toggleDropdown()
+            if callback then
+                callback(option)
+            end
         end)
     end
+end
 }
-
-add.header("XFD")
-
-add.text("This is a test")
-
-local textxx = add.text("This is a test2")
-
-add.Button("Test", function()
-    print("Test")
-    textxx.new("This is a new text")
-end)
-
-add.header("XFD")
-
-add.Button("Test", function()
-    print("Test")
-end)
-
-add.header("Toggle Header")
-
--- ตัวอย่างการใช้งาน
-add.Toggle("Enable Feature", false, function(state)
-    print("Toggle is now", state)
-end)
-
