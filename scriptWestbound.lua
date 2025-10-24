@@ -2,7 +2,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/blood
 
 local OwO = library:Window("Xcx Hub")
 
-OwO:Toggle("Kill See", false, function(bool)
+OwO:Toggle("Kill Aura", false, function(bool)
     local Players = game:GetService("Players")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local Camera = workspace.CurrentCamera
@@ -14,7 +14,7 @@ OwO:Toggle("Kill See", false, function(bool)
     local COOLDOWN = 0.3
     local lastShot = 0
     _G.SilentAimEnabled = bool -- เปิด/ปิดจาก GUI เท่านั้น
-    _G.TeamCheckKillSee = true        -- TeamCheck เปิดอยู่เสมอ
+    _G.TeamCheckKillAura = true        -- TeamCheck เปิดอยู่เสมอ
 
     local ammoMapping = {
         Pistol = "PistolAmmo",
@@ -37,7 +37,7 @@ OwO:Toggle("Kill See", false, function(bool)
         if player == LocalPlayer then return false end
         if not player.Team then return false end
         if player.Team.Name == "Civilians" then return false end
-        if _G.TeamCheckKillSee and player.Team == LocalPlayer.Team then
+        if _G.TeamCheckKillAura and player.Team == LocalPlayer.Team then
             return false
         end
         return true
@@ -155,8 +155,8 @@ end)
 OwO:Toggle("TeamCheck (Silent Aim)", true, function(bool)
     _G.TeamChecksilentAim = bool
 end)
-OwO:Toggle("TeamCheck (Kill See)", true, function(bool)
-    _G.TeamCheckKillSee = bool
+OwO:Toggle("TeamCheck (Kill Aura)", true, function(bool)
+    _G.TeamCheckKillAura = bool
 end)
 
 local Players = game:GetService("Players")
@@ -186,7 +186,7 @@ local function isValidTarget(player)
         if player == LocalPlayer then return false end
         if not player.Team then return false end
         if player.Team.Name == "Civilians" then return false end
-        if _G.TeamCheckKillSee and player.Team == LocalPlayer.Team then
+        if _G.TeamCheckKillAura and player.Team == LocalPlayer.Team then
             return false
         end
         return true
